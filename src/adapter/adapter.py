@@ -1,14 +1,14 @@
 from abc import ABCMeta, abstractmethod
 
-from .algorithm import ClientData
+from .algorithm import AlgorithmData
+from .algorithm.device.icm20948 import ICM20948AlgorithmFactory
+from .algorithm.device.test_device import TestDeviceAlgorithmFactory
 from .algorithm.interface import AlgorithmFactory
-from .algorithm.test_device import TestDeviceAlgorithmFactory
-from .algorithm.icm20948 import ICM20948AlgorithmFactory
 
 
 class Adapter(metaclass=ABCMeta):
     @abstractmethod
-    def get_client_data(self, msg: dict) -> ClientData:
+    def get_algorithm_data(self, msg: dict) -> AlgorithmData:
         pass
 
     @abstractmethod
@@ -17,29 +17,32 @@ class Adapter(metaclass=ABCMeta):
 
 
 class TestAdapter(Adapter):
-    def get_client_data(self, msg: dict) -> ClientData:
-        return ClientData(cfg=msg["cfg"], data=msg["data"])
+    def get_algorithm_data(self, msg: dict) -> AlgorithmData:
+        return AlgorithmData(cfg=msg["cfg"], data=msg["data"])
 
     def get_algorithm_factory(self) -> AlgorithmFactory:
         return TestDeviceAlgorithmFactory()
 
 
 class ICM20948Adapter(Adapter):
-    def get_client_data(self, msg: dict) -> ClientData:
+    def get_algorithm_data(self, msg: dict) -> AlgorithmData:
         cfg = {
-            "acc_range": msg["acc_range"],
-            "acc_sample_rate": msg["acc_sample_rate"],
-            "acc_sample_dots": msg["acc_sample_dots"],
+            "accelerate_range": msg["acc_range"],
+            "sample_rate": msg["acc_sample_rate"],
+            "sample_dots": msg["acc_sample_dots"],
         }
-        hex_str = msg["data"]
-        data = bytearray.fromhex(hex_str)
-        data = [
-            int.from_bytes(data[i : i + 4], "little") for i in range(0, len(data), 4)
-        ]
-        return ClientData(cfg=cfg, data={"data": data})
+        data = {"data": self.__convert_from_hex(msg["data"])}
+        return AlgorithmData(cfg=cfg, data=data)
 
     def get_algorithm_factory(self) -> AlgorithmFactory:
         return ICM20948AlgorithmFactory()
+
+    def __convert_from_hex(self, hex_str: str) -> list[int]:
+        byte_array = bytearray.fromhex(hex_str)
+        return [
+            int.from_bytes(byte_array[i : i + 4], "little")
+            for i in range(0, len(byte_array), 4)
+        ]
 
 
 class AdapterFactory:

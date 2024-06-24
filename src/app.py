@@ -1,5 +1,4 @@
 import asyncio
-from copy import deepcopy
 import sys
 import threading
 
@@ -50,7 +49,7 @@ class BearingWebSocketCallback(JSONWebSocketCallback):
         factory = adapter.get_algorithm_factory()
 
         client_hash = hash(websocket)
-        client_data = adapter.get_client_data(data)
+        client_data = adapter.get_algorithm_data(data)
         algorithm = factory.get_algorithm(factory.get_algorithm_names()[0])
         new_client = Client(
             client_hash=client_hash,
@@ -61,12 +60,14 @@ class BearingWebSocketCallback(JSONWebSocketCallback):
             algorithm_params=algorithm.get_default_params(),
         )
         self.__client_manager.add_client(client_hash, new_client)
-        self.__client_manager.set_client_data(client_hash, {"client_data": client_data})
+        self.__client_manager.set_client_data(
+            client_hash, {"algorithm_data": client_data}
+        )
 
     def __set_client_data(self, websocket: WebSocket, data: dict):
         adapter = AdapterFactory.get_adapter(data["device_type"])
         self.__client_manager.set_client_data(
-            hash(websocket), {"client_data": adapter.get_client_data(data)}
+            hash(websocket), {"algorithm_data": adapter.get_algorithm_data(data)}
         )
 
 
@@ -84,8 +85,8 @@ class Solver:
         lock = self.__get_lock(client.client_hash)
         with lock:
             client.algorithm.solve(
-                data=deepcopy(client.client_data),
-                params=deepcopy(client.algorithm_params),
+                data=client.algorithm_data,
+                params=client.algorithm_params,
             )
 
     def __get_lock(self, client_hash: int):
@@ -113,7 +114,7 @@ class App:
         client_manager = ClientManager(
             client_observers=ConditionalObserver(
                 lambda _, k: k == "algorithm"
-                or k == "client_data"
+                or k == "algorithm_data"
                 or k == "algorithm_params",
                 algorithm_update,
             ),

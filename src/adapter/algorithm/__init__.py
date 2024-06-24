@@ -1,4 +1,4 @@
 from .interface import Algorithm
-from .client_data import ClientData
+from .algorithm_data import AlgorithmData
 
-__all__ = ["Algorithm", "ClientData"]
+__all__ = ["Algorithm", "AlgorithmData"]

@@ -2,6 +2,6 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ClientData:
+class AlgorithmData:
     cfg: dict
     data: dict

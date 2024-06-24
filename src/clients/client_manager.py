@@ -72,7 +72,7 @@ class ClientManager:
         name = self.__client_map[client_id].client_name
         self.add_message(client_id, f"Client {name} connected.")
         self.add_message(
-            client_id, f"Config: {self.__client_map[client_id].client_data.cfg}."
+            client_id, f"Config: {self.__client_map[client_id].algorithm_data.cfg}."
         )
         self.__add_data_recv_msg(client_id)
 

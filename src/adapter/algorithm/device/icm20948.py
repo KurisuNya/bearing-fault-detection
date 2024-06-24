@@ -1,12 +1,12 @@
 from dataclasses import asdict
 
-from .client_data import ClientData
-from .interface import Algorithm, AlgorithmError, AlgorithmFactory
-from .param import Param, ParamError
+from ..algorithm_data import AlgorithmData
+from ..interface import Algorithm, AlgorithmError, AlgorithmFactory
+from ..param import Param, ParamError
 
 
-class TestAlgorithm(Algorithm):
-    def solve(self, data: ClientData, params: dict[str, Param]):
+class ICM20948TestAlgorithm(Algorithm):
+    def solve(self, data: AlgorithmData, params: dict[str, Param]):
         self.__check_params(params)
         print("Algorithm received data: ", asdict(data))
         print(
@@ -43,11 +43,11 @@ class TestAlgorithm(Algorithm):
         }
 
 
-class TestDeviceAlgorithmFactory(AlgorithmFactory):
+class ICM20948AlgorithmFactory(AlgorithmFactory):
     @staticmethod
     def get_algorithm(algorithm_name: str) -> Algorithm:
         if algorithm_name == "Test":
-            return TestAlgorithm()
+            return ICM20948TestAlgorithm()
         else:
             raise ValueError("Unknown algorithm name")
 

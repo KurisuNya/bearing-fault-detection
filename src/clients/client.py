@@ -1,7 +1,7 @@
 from copy import deepcopy
 from dataclasses import asdict, dataclass, field
 
-from ..adapter.algorithm import ClientData
+from ..adapter.algorithm import AlgorithmData
 from ..adapter.algorithm.interface import Algorithm, AlgorithmFactory
 from ..adapter.algorithm.param import Param
 from .utils.observer import Observable
@@ -15,7 +15,7 @@ class Client(Observable):
 
     algorithm: Algorithm
     algorithm_params: dict[str, Param]
-    client_data: ClientData = field(default_factory=lambda: ClientData({}, {}))
+    algorithm_data: AlgorithmData = field(default_factory=lambda: AlgorithmData({}, {}))
     figure_list: list = field(default_factory=list)
     label_text: str = ""
 
