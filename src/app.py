@@ -2,12 +2,12 @@ import asyncio
 import sys
 import threading
 
-from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtWidgets import QApplication
 from qasync import QEventLoop
 
 from .adapter import AdapterFactory
 from .clients import Client, ClientManager, ConditionalObserver
-from .gui.window_ui import Ui_MainWindow
+from .gui.window import MainWindow
 from .websocket import JSONWebSocketCallback, WebSocket, WebSocketData, WebSocketServer
 
 
@@ -91,13 +91,6 @@ class Solver:
         if client_hash not in self.__locks:
             self.__locks[client_hash] = threading.Lock()
         return self.__locks[client_hash]
-
-
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
 
 
 class App:
