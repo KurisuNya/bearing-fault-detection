@@ -2,8 +2,6 @@ import asyncio
 import sys
 import threading
 
-from PySide6.QtCore import QSize, Qt
-from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QApplication, QMainWindow
 from qasync import QEventLoop
 
@@ -49,7 +47,7 @@ class BearingWebSocketCallback(JSONWebSocketCallback):
         factory = adapter.get_algorithm_factory()
 
         client_hash = hash(websocket)
-        client_data = adapter.get_algorithm_data(data)
+        algorithm_data = adapter.get_algorithm_data(data)
         algorithm = factory.get_algorithm(factory.get_algorithm_names()[0])
         new_client = Client(
             client_hash=client_hash,
@@ -61,7 +59,7 @@ class BearingWebSocketCallback(JSONWebSocketCallback):
         )
         self.__client_manager.add_client(client_hash, new_client)
         self.__client_manager.set_client_data(
-            client_hash, {"algorithm_data": client_data}
+            client_hash, {"algorithm_data": algorithm_data}
         )
 
     def __set_client_data(self, websocket: WebSocket, data: dict):
@@ -107,34 +105,28 @@ class App:
     @staticmethod
     async def websocket_run(path: str, port: int):
         solver = Solver()
-
-        def algorithm_update(client: Client, _):
-            solver.solve(client)
-
-        client_manager = ClientManager(
-            client_observers=ConditionalObserver(
-                lambda _, k: k == "algorithm"
-                or k == "algorithm_data"
-                or k == "algorithm_params",
-                algorithm_update,
-            ),
+        algorithm_observer = ConditionalObserver(
+            lambda _, k: k == "algorithm"
+            or k == "algorithm_data"
+            or k == "algorithm_params",
+            lambda client, _: solver.solve(client),
         )
+
+        client_manager = ClientManager(client_observers=[algorithm_observer])
         callback = BearingWebSocketCallback(client_manager)
         server = WebSocketServer(path, port, callback)
         await server.run()
 
     @staticmethod
     def run(path: str, port: int):
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(App.websocket_run(path, port))
-        loop.run_forever()
-        # app = QApplication(sys.argv)
-        # event_loop = QEventLoop(app)
-        # asyncio.set_event_loop(event_loop)
-        # app_close_event = asyncio.Event()
-        # app.aboutToQuit.connect(app_close_event.set)
-        # main_window = MainWindow()
-        # main_window.show()
-        # event_loop.create_task(App.websocket_run(path, port))
-        # event_loop.run_until_complete(app_close_event.wait())
-        # event_loop.close()
+        app = QApplication(sys.argv)
+        main_window = MainWindow()
+        main_window.show()
+
+        event_loop = QEventLoop(app)
+        asyncio.set_event_loop(event_loop)
+        app_close_event = asyncio.Event()
+        app.aboutToQuit.connect(app_close_event.set)
+        event_loop.create_task(App.websocket_run(path, port))
+        event_loop.run_until_complete(app_close_event.wait())
+        event_loop.close()

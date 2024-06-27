@@ -1,9 +1,9 @@
 from copy import deepcopy
 from dataclasses import asdict, dataclass, field
 
-from ..adapter.algorithm import AlgorithmData
-from ..adapter.algorithm.interface import Algorithm, AlgorithmFactory
-from ..adapter.algorithm.param import Param
+from ..algorithm import AlgorithmData
+from ..algorithm.interface import Algorithm, AlgorithmFactory
+from ..algorithm.param import Param
 from .utils.observer import Observable
 
 
