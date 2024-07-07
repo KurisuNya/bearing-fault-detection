@@ -3,7 +3,6 @@ import sys
 import threading
 
 from PySide6.QtWidgets import QApplication
-from qasync import QEventLoop
 
 from .adapter import AdapterFactory
 from .clients import Client, ClientManager, ConditionalObserver
@@ -50,14 +49,14 @@ class BearingWebSocketCallback(JSONWebSocketCallback):
         algorithm_data = adapter.get_algorithm_data(data)
         algorithm = factory.get_algorithm(factory.get_algorithm_names()[0])
         new_client = Client(
-            client_hash=client_hash,
+            client_id=client_hash,
             client_name=get_client_name(websocket, data),
             algorithm_factory=factory,
             algorithm=algorithm,
             algorithm_index=0,
             algorithm_params=algorithm.get_default_params(),
         )
-        self.__client_manager.add_client(client_hash, new_client)
+        self.__client_manager.add_client(new_client)
         self.__client_manager.set_client_data(
             client_hash, {"algorithm_data": algorithm_data}
         )
@@ -69,22 +68,26 @@ class BearingWebSocketCallback(JSONWebSocketCallback):
         )
 
 
-class Solver:
+class AlgorithmSolver:
     __locks: dict[int, threading.Lock]
 
     def __init__(self):
         self.__locks = {}
 
-    def solve(self, client: Client):
-        thread = threading.Thread(target=self.__run, args=(client,))
+    def solve(self, client: Client, client_manager: ClientManager):
+        thread = threading.Thread(target=self.__run, args=(client, client_manager))
         thread.start()
 
-    def __run(self, client: Client):
-        lock = self.__get_lock(client.client_hash)
+    def __run(self, client: Client, client_manager: ClientManager):
+        lock = self.__get_lock(client.client_id)
         with lock:
-            client.algorithm.solve(
+            algorithm_result = client.algorithm.solve(
                 data=client.algorithm_data,
                 params=client.algorithm_params,
+            )
+            client_manager.set_client_data(
+                client.client_id,
+                {"algorithm_result": algorithm_result},
             )
 
     def __get_lock(self, client_hash: int):
@@ -94,19 +97,26 @@ class Solver:
 
 
 class App:
+    __algorithm_solver: AlgorithmSolver = AlgorithmSolver()
+    __client_manager: ClientManager = ClientManager()
 
     @staticmethod
     async def websocket_run(path: str, port: int):
-        solver = Solver()
-        algorithm_observer = ConditionalObserver(
+        solve_observer = ConditionalObserver(
             lambda _, k: k == "algorithm"
             or k == "algorithm_data"
             or k == "algorithm_params",
-            lambda client, _: solver.solve(client),
+            lambda client, _: App.__algorithm_solver.solve(
+                client, App.__client_manager
+            ),
+        )
+        result_observer = ConditionalObserver(
+            lambda _, k: k == "algorithm_result",
+            lambda client, _: print(client.client_id, "result calculated"),
         )
 
-        client_manager = ClientManager(client_observers=[algorithm_observer])
-        callback = BearingWebSocketCallback(client_manager)
+        App.__client_manager.set_default_observers([solve_observer, result_observer])
+        callback = BearingWebSocketCallback(App.__client_manager)
         server = WebSocketServer(path, port, callback)
         await server.run()
 
@@ -115,11 +125,8 @@ class App:
         app = QApplication(sys.argv)
         main_window = MainWindow()
         main_window.show()
-
-        event_loop = QEventLoop(app)
-        asyncio.set_event_loop(event_loop)
-        app_close_event = asyncio.Event()
-        app.aboutToQuit.connect(app_close_event.set)
-        event_loop.create_task(App.websocket_run(path, port))
-        event_loop.run_until_complete(app_close_event.wait())
-        event_loop.close()
+        threading.Thread(
+            target=lambda: asyncio.run(App.websocket_run(path, port)),
+            daemon=True,
+        ).start()
+        app.exec()

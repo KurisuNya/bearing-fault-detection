@@ -1,17 +1,18 @@
 from dataclasses import asdict
 
-from ..algorithm_data import AlgorithmData
+from ..algorithm_data import AlgorithmData, AlgorithmResult
 from ..interface import Algorithm, AlgorithmError, AlgorithmFactory
 from ..param import Param, ParamError
 
 
 class ICM20948TestAlgorithm(Algorithm):
-    def solve(self, data: AlgorithmData, params: dict[str, Param]):
+    def solve(self, data: AlgorithmData, params: dict[str, Param]) -> AlgorithmResult:
         self.__check_params(params)
         print("Algorithm received data: ", asdict(data))
         print(
             "Algorithm received params: ", {k: v.get_value() for k, v in params.items()}
         )
+        return AlgorithmResult({}, "Test algorithm result")
 
     def __check_params(self, params: dict[str, Param]):
         for key, param in params.items():

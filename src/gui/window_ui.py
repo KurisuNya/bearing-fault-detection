@@ -17,22 +17,24 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QFrame,
     QGridLayout, QHBoxLayout, QLabel, QLayout,
-    QMainWindow, QSizePolicy, QSpacerItem, QTextEdit,
-    QVBoxLayout, QWidget)
+    QMainWindow, QPushButton, QSizePolicy, QSpacerItem,
+    QTextEdit, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(768, 576)
-        MainWindow.setMinimumSize(QSize(640, 480))
+        MainWindow.resize(900, 675)
+        MainWindow.setMinimumSize(QSize(900, 675))
         MainWindow.setIconSize(QSize(24, 24))
         MainWindow.setToolButtonStyle(Qt.ToolButtonIconOnly)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
+        self.centralwidget.setAutoFillBackground(False)
         self.mainHorizontalLayout = QHBoxLayout(self.centralwidget)
         self.mainHorizontalLayout.setSpacing(2)
         self.mainHorizontalLayout.setObjectName(u"mainHorizontalLayout")
+        self.mainHorizontalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.mainHorizontalLayout.setContentsMargins(2, 2, 2, 2)
         self.leftVerticalLayout = QVBoxLayout()
         self.leftVerticalLayout.setSpacing(0)
@@ -40,6 +42,12 @@ class Ui_MainWindow(object):
         self.msgTextEdit = QTextEdit(self.centralwidget)
         self.msgTextEdit.setObjectName(u"msgTextEdit")
         self.msgTextEdit.setEnabled(True)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.msgTextEdit.sizePolicy().hasHeightForWidth())
+        self.msgTextEdit.setSizePolicy(sizePolicy)
+        self.msgTextEdit.setMinimumSize(QSize(250, 0))
         self.msgTextEdit.setMaximumSize(QSize(250, 16777215))
         self.msgTextEdit.setAutoFillBackground(False)
         self.msgTextEdit.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
@@ -61,10 +69,16 @@ class Ui_MainWindow(object):
         self.centerVerticalLayout = QVBoxLayout()
         self.centerVerticalLayout.setSpacing(0)
         self.centerVerticalLayout.setObjectName(u"centerVerticalLayout")
-        self.aboveFigureLabel = QLabel(self.centralwidget)
-        self.aboveFigureLabel.setObjectName(u"aboveFigureLabel")
+        self.centerVerticalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.aboveFigure = QWidget(self.centralwidget)
+        self.aboveFigure.setObjectName(u"aboveFigure")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.aboveFigure.sizePolicy().hasHeightForWidth())
+        self.aboveFigure.setSizePolicy(sizePolicy1)
 
-        self.centerVerticalLayout.addWidget(self.aboveFigureLabel)
+        self.centerVerticalLayout.addWidget(self.aboveFigure)
 
         self.line = QFrame(self.centralwidget)
         self.line.setObjectName(u"line")
@@ -73,10 +87,10 @@ class Ui_MainWindow(object):
 
         self.centerVerticalLayout.addWidget(self.line)
 
-        self.belowFigureLabel = QLabel(self.centralwidget)
-        self.belowFigureLabel.setObjectName(u"belowFigureLabel")
+        self.belowFigure = QWidget(self.centralwidget)
+        self.belowFigure.setObjectName(u"belowFigure")
 
-        self.centerVerticalLayout.addWidget(self.belowFigureLabel)
+        self.centerVerticalLayout.addWidget(self.belowFigure)
 
         self.line_2 = QFrame(self.centralwidget)
         self.line_2.setObjectName(u"line_2")
@@ -87,6 +101,8 @@ class Ui_MainWindow(object):
 
         self.resultLabel = QLabel(self.centralwidget)
         self.resultLabel.setObjectName(u"resultLabel")
+        sizePolicy1.setHeightForWidth(self.resultLabel.sizePolicy().hasHeightForWidth())
+        self.resultLabel.setSizePolicy(sizePolicy1)
         self.resultLabel.setMaximumSize(QSize(16777215, 50))
         self.resultLabel.setAlignment(Qt.AlignCenter)
 
@@ -114,6 +130,28 @@ class Ui_MainWindow(object):
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.rightVerticalLayout.addItem(self.verticalSpacer)
+
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.setParamButton = QPushButton(self.centralwidget)
+        self.setParamButton.setObjectName(u"setParamButton")
+
+        self.horizontalLayout.addWidget(self.setParamButton)
+
+        self.resetParamButton = QPushButton(self.centralwidget)
+        self.resetParamButton.setObjectName(u"resetParamButton")
+
+        self.horizontalLayout.addWidget(self.resetParamButton)
+
+
+        self.rightVerticalLayout.addLayout(self.horizontalLayout)
+
+        self.line_5 = QFrame(self.centralwidget)
+        self.line_5.setObjectName(u"line_5")
+        self.line_5.setFrameShape(QFrame.Shape.HLine)
+        self.line_5.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.rightVerticalLayout.addWidget(self.line_5)
 
         self.gridLayout = QGridLayout()
         self.gridLayout.setObjectName(u"gridLayout")
@@ -172,6 +210,13 @@ class Ui_MainWindow(object):
 
         self.backendCheckBox = QCheckBox(self.centralwidget)
         self.backendCheckBox.setObjectName(u"backendCheckBox")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.backendCheckBox.sizePolicy().hasHeightForWidth())
+        self.backendCheckBox.setSizePolicy(sizePolicy2)
+        self.backendCheckBox.setMinimumSize(QSize(250, 0))
+        self.backendCheckBox.setMaximumSize(QSize(250, 16777215))
 
         self.rightVerticalLayout.addWidget(self.backendCheckBox)
 
@@ -179,7 +224,7 @@ class Ui_MainWindow(object):
         self.mainHorizontalLayout.addLayout(self.rightVerticalLayout)
 
         self.mainHorizontalLayout.setStretch(0, 1)
-        self.mainHorizontalLayout.setStretch(2, 2)
+        self.mainHorizontalLayout.setStretch(2, 100)
         self.mainHorizontalLayout.setStretch(4, 1)
         MainWindow.setCentralWidget(self.centralwidget)
 
@@ -190,9 +235,9 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"\u6eda\u73e0\u8f74\u627f\u6545\u969c\u68c0\u6d4b", None))
-        self.aboveFigureLabel.setText("")
-        self.belowFigureLabel.setText("")
         self.resultLabel.setText("")
+        self.setParamButton.setText(QCoreApplication.translate("MainWindow", u"\u8bbe\u7f6e\u53c2\u6570", None))
+        self.resetParamButton.setText(QCoreApplication.translate("MainWindow", u"\u8fd8\u539f\u53c2\u6570", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"\u7b97\u6cd5", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"\u5ba2\u6237\u7aef", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"\u56fe1", None))

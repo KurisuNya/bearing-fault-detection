@@ -1,12 +1,12 @@
 from abc import ABCMeta, abstractmethod
 
-from .algorithm_data import AlgorithmData
+from .algorithm_data import AlgorithmData, AlgorithmResult
 from .param import Param
 
 
 class Algorithm(metaclass=ABCMeta):
     @abstractmethod
-    def solve(self, data: AlgorithmData, params: dict[str, Param]):
+    def solve(self, data: AlgorithmData, params: dict[str, Param]) -> AlgorithmResult:
         pass
 
     @abstractmethod

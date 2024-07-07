@@ -1,7 +1,7 @@
 from copy import deepcopy
 from dataclasses import asdict, dataclass, field
 
-from ..algorithm import AlgorithmData
+from ..algorithm import AlgorithmData, AlgorithmResult
 from ..algorithm.interface import Algorithm, AlgorithmFactory
 from ..algorithm.param import Param
 from .utils.observer import Observable
@@ -9,22 +9,28 @@ from .utils.observer import Observable
 
 @dataclass
 class Client(Observable):
-    client_hash: int
+    # fixed parameters
+    client_id: int
     client_name: str
     algorithm_factory: AlgorithmFactory
 
+    # algorithm parameters
     algorithm: Algorithm
     algorithm_params: dict[str, Param]
     algorithm_data: AlgorithmData = field(default_factory=lambda: AlgorithmData({}, {}))
-    figure_list: list = field(default_factory=list)
-    label_text: str = ""
+    algorithm_result: AlgorithmResult = field(
+        default_factory=lambda: AlgorithmResult({}, "")
+    )
 
+    # gui parameters
     algorithm_index: int = 0
     above_figure_index: int = 0
     below_figure_index: int = 0
-    backend_calculation: bool = False
-
     msg: str = ""
+
+    # flags
+    backend_calculation: bool = False
+    need_update: bool = False
 
     __observers = []
 
