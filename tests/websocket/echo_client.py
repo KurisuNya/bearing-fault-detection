@@ -1,5 +1,4 @@
 import asyncio
-from datetime import time
 import json
 
 import websockets
@@ -12,10 +11,10 @@ async def echo(path, port):
         data = 0
         while True:
             data += 1
-            await asyncio.sleep(1)
             await websocket.send(
                 json.dumps({"device_type": device_type, "cfg": cfg, "data": data})
             )
+            await asyncio.sleep(1)
 
 
 loop = asyncio.new_event_loop()

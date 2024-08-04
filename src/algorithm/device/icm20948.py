@@ -2,7 +2,16 @@ from dataclasses import asdict
 
 from ..algorithm_data import AlgorithmData, AlgorithmResult
 from ..interface import Algorithm, AlgorithmError, AlgorithmFactory
-from ..param import Param, ParamError
+from ..param import (
+    FloatType,
+    IntType,
+    NotSpecificChecker,
+    Param,
+    RangeChecker,
+    SpecificChecker,
+    StepChecker,
+    StrType,
+)
 
 
 class ICM20948TestAlgorithm(Algorithm):
@@ -20,26 +29,24 @@ class ICM20948TestAlgorithm(Algorithm):
                 raise AlgorithmError(f"Parameter {key} is not set")
 
     def get_default_params(self) -> dict[str, Param]:
-        def check_type(value):
-            if not isinstance(value, int):
-                raise ParamError("Value must be an integer")
-
-        def check_range(value):
-            if value < 0 or value > 100:
-                raise ParamError("Value must be between 0 and 100")
-
-        def check_step(value):
-            if value % 10 != 0:
-                raise ParamError("Value must be a multiple of 10")
+        range_checker = RangeChecker(
+            min=0,
+            max=100,
+            left_open=False,
+            right_open=False,
+        )
+        step_checker = StepChecker(step=10)
 
         return {
             "param1": Param(
+                type=IntType(),
                 value=10,
-                check_funcs=[check_type, check_range],
+                checkers=[range_checker],
             ),
             "param2": Param(
+                type=IntType(),
                 value=20,
-                check_funcs=[check_type, check_range, check_step],
+                checkers=[range_checker, step_checker],
             ),
         }
 

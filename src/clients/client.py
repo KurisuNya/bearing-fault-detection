@@ -23,13 +23,14 @@ class Client(Observable):
     )
 
     # gui parameters
-    algorithm_index: int = 0
-    above_figure_index: int = 0
-    below_figure_index: int = 0
     msg: str = ""
+    algorithm_name: str = ""
+    above_figure_name: str | None = None
+    below_figure_name: str | None = None
 
     # flags
     backend_calculation: bool = False
+    stop_calculation: bool = False
     need_update: bool = False
 
     __observers = []
@@ -55,13 +56,17 @@ class Client(Observable):
 
     def notify(self, keys):
         for observer in self.__observers:
-            for keys in self.__to_list(keys):
-                observer.update(deepcopy(self), keys)
+            for key in self.__to_list(keys):
+                client = deepcopy(self)
+                client.detach_all()
+                observer.update(client, key)
 
     def notify_all(self):
         for observer in self.__observers:
             for key in list(asdict(self).keys()):
-                observer.update(deepcopy(self), key)
+                client = deepcopy(self)
+                client.detach_all()
+                observer.update(client, key)
 
     def __setattr__(self, key, value):
         if not hasattr(self, key) or "__observers" in key:

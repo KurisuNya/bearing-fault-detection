@@ -1,0 +1,2 @@
+class ParamError(Exception):
+    pass
