@@ -18,7 +18,6 @@ from ..param import (
 
 class TestAlgorithm_01(Algorithm):
     def solve(self, data: AlgorithmData, params: dict[str, Param]) -> AlgorithmResult:
-        self.__check_params(params)
         figure1 = Figure()
         figure2 = Figure()
         figure1.subplots().text(0, 0.5, f"Figure 1 ({datetime.now()})", fontsize=20)
@@ -35,11 +34,6 @@ class TestAlgorithm_01(Algorithm):
             },
             f"Test algorithm 01, P1: {param1}, P2: {param2}, P3: {param3}",
         )
-
-    def __check_params(self, params: dict[str, Param]):
-        for key, param in params.items():
-            if not param.get_value():
-                raise AlgorithmError(f"Parameter {key} is not set")
 
     def get_default_params(self) -> dict[str, Param]:
         range_checker = RangeChecker(

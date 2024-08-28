@@ -16,17 +16,11 @@ from ..param import (
 
 class ICM20948TestAlgorithm(Algorithm):
     def solve(self, data: AlgorithmData, params: dict[str, Param]) -> AlgorithmResult:
-        self.__check_params(params)
         print("Algorithm received data: ", asdict(data))
         print(
             "Algorithm received params: ", {k: v.get_value() for k, v in params.items()}
         )
         return AlgorithmResult({}, "Test algorithm result")
-
-    def __check_params(self, params: dict[str, Param]):
-        for key, param in params.items():
-            if not param.get_value():
-                raise AlgorithmError(f"Parameter {key} is not set")
 
     def get_default_params(self) -> dict[str, Param]:
         range_checker = RangeChecker(

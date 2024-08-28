@@ -1,8 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
 from .algorithm import AlgorithmData
-from .algorithm.device.icm20948 import ICM20948AlgorithmFactory
-from .algorithm.device.test_device import TestDeviceAlgorithmFactory
 from .algorithm.interface import AlgorithmFactory
 
 
@@ -21,28 +19,32 @@ class TestAdapter(Adapter):
         return AlgorithmData(cfg=msg["cfg"], data=msg["data"])
 
     def get_algorithm_factory(self) -> AlgorithmFactory:
+        from .algorithm.device.test_device import TestDeviceAlgorithmFactory
+
         return TestDeviceAlgorithmFactory()
 
 
 class ICM20948Adapter(Adapter):
     def get_algorithm_data(self, msg: dict) -> AlgorithmData:
+        def convert_from_hex(hex_str: str) -> list[int]:
+            byte_array = bytearray.fromhex(hex_str)
+            return [
+                int.from_bytes(byte_array[i : i + 4], "little")
+                for i in range(0, len(byte_array), 4)
+            ]
+
         cfg = {
             "accelerate_range": msg["acc_range"],
             "sample_rate": msg["acc_sample_rate"],
             "sample_dots": msg["acc_sample_dots"],
         }
-        data = {"data": self.__convert_from_hex(msg["data"])}
+        data = {"data": convert_from_hex(msg["data"])}
         return AlgorithmData(cfg=cfg, data=data)
 
     def get_algorithm_factory(self) -> AlgorithmFactory:
-        return ICM20948AlgorithmFactory()
+        from .algorithm.device.icm20948 import ICM20948AlgorithmFactory
 
-    def __convert_from_hex(self, hex_str: str) -> list[int]:
-        byte_array = bytearray.fromhex(hex_str)
-        return [
-            int.from_bytes(byte_array[i : i + 4], "little")
-            for i in range(0, len(byte_array), 4)
-        ]
+        return ICM20948AlgorithmFactory()
 
 
 class AdapterFactory:
